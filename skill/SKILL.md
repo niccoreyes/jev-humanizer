@@ -6,4 +6,4 @@ description: Audit and edit English prose with Jev. Use when asked to humanize w
 
 # Jev Humanizer
 
-Follow [ENGLISH.md](ENGLISH.md) for the complete English writing workflow. Set `JEV` to the absolute path of this repository, normally `/Users/niccoreyes/Github/jev-humanizer` on Nicco's Mac. Run the audit from that checkout. Treat Jev findings as suggestions to verify against the text, and compare the final draft with the source before returning it.
+Follow [ENGLISH.md](ENGLISH.md) for the complete English writing workflow. Set `JEV` to the absolute path of the repository that contains this skill. On Nicco's Mac it is usually `~/Github/jev-humanizer`; on other hosts it may be `~/.codex/jev-humanizer`. Check which path exists before running the audit from that checkout. Treat Jev findings as suggestions to verify against the text, and compare the final draft with the source before returning it.
