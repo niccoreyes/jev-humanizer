@@ -27,7 +27,7 @@ The CLI requires Python 3 and uses the standard library. It reads `TYPESAFE_API_
 python3 -m jev_humanizer.audit draft.md --lang en --no-jev
 ```
 
-For an agent, point it to [`skill/SKILL.md`](skill/SKILL.md), which routes English writing to [`skill/ENGLISH.md`](skill/ENGLISH.md). Set `JEVH` to the absolute path of your checkout if it is elsewhere.
+For an agent, point it to [`skill/SKILL.md`](skill/SKILL.md), which routes English writing to [`skill/ENGLISH.md`](skill/ENGLISH.md). Set `JEV` to the absolute path of your checkout if it is elsewhere.
 
 ## Evaluation status
 
