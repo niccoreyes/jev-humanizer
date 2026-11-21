@@ -252,7 +252,7 @@ class OwnerRuleTests(unittest.TestCase):
     def test_owner_rules_file_names_the_rule(self):
         notes = (audit.VENDOR.parents[1] / "knowledge" / "corrections-en.md").read_text(encoding="utf-8")
         self.assertIn("I hope this message finds you well", notes)
-        self.assertIn("Санжар, 20.11.2026", notes)
+        self.assertIn("Keep numbers, dates, names, citations", notes)
 
 
 if __name__ == "__main__":

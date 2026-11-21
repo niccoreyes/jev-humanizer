@@ -157,7 +157,9 @@ PARAGRAPH_PATTERNS = [
              "the gap with a plausible guess: based on available information, not widely documented, "
              "likely grew up.",
              "Details are limited in available sources, but it appears to date from the 1990s",
-             "Saying what the reader has not confirmed yet, or asking for missing information, is normal."),
+             "A specific evidence limit is normal, including a small sample, missing data, an unverified result, "
+             "or uncertainty stated with a source. Saying what the reader has not confirmed yet, or asking "
+             "for missing information, is also normal."),
     _pattern(25, "Writing about the document instead of its subject",
              "the text describes itself: what it replaced, how it was compiled, or a layout the reader "
              "can already see (the table below compares, this section is organized by).",

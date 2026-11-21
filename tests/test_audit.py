@@ -274,7 +274,7 @@ class AuditTests(unittest.TestCase):
                 report = audit.audit_text(case["prompt"], client=fake_client)
                 self.assertEqual(sum(r["paragraph"] is not None for r in report["requests"]),
                                  len(report["paragraphs"]))
-                self.assertIn("Jev: входных токенов", audit.render_markdown(report, sections=True))
+                self.assertIn("input tokens", audit.render_markdown(report, sections=True))
                 json.dumps(report, ensure_ascii=False, allow_nan=False)
 
 

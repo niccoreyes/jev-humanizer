@@ -17,6 +17,7 @@ import math
 import os
 from pathlib import Path
 import re
+import ssl
 import sys
 import time
 import urllib.error
@@ -108,9 +109,14 @@ def call_jev(state, questions, *, api_key):
     request = urllib.request.Request(API_URL, data=body, method="POST", headers={
         "Authorization": f"Bearer {api_key}", "Content-Type": "application/json",
     })
+    ca_bundle = Path('/etc/ssl/cert.pem')
+    default_ca = ssl.get_default_verify_paths()
+    context = (ssl.create_default_context(cafile=str(ca_bundle))
+               if default_ca.cafile is None and ca_bundle.is_file()
+               else ssl.create_default_context())
     for attempt in range(3):
         try:
-            with urllib.request.urlopen(request, timeout=60) as response:
+            with urllib.request.urlopen(request, timeout=60, context=context) as response:
                 return json.load(response)
         except urllib.error.HTTPError as exc:
             status = exc.code
@@ -118,11 +124,11 @@ def call_jev(state, questions, *, api_key):
             if status not in (408, 429) and not 500 <= status < 600:
                 raise RuntimeError(f"Jev: HTTP {status}.") from None
             error = f"HTTP {status}"
-        except (urllib.error.URLError, OSError, http.client.HTTPException):
-            error = "сетевая ошибка"
+        except (urllib.error.URLError, OSError, http.client.HTTPException) as exc:
+            error = f"network error: {getattr(exc, 'reason', exc)}"
         if attempt < 2:
             time.sleep(2 ** attempt)
-    raise RuntimeError(f"Jev: {error} после трёх попыток.")
+    raise RuntimeError(f"Jev: {error} after three attempts.")
 
 
 def extract_sections(numbers, path=PATTERNS_PATH):
@@ -271,21 +277,21 @@ def _cell(value):
 
 def render_markdown(report, *, sections=False):
     found = visible_findings(report)
-    lines = ["| абзац № | паттерн | источник (jev/lint) | вероятность/уровень | начало абзаца или цитата линтера |",
+    lines = ["| Paragraph | Pattern | Source | Probability / level | Excerpt |",
              "| --- | --- | --- | --- | --- |"]
     for finding in found:
         label = finding["name"]
         if finding["pattern"] is not None and not re.match(r"^\d+\b", label):
             label = f"{finding['pattern']}. {label}"
         score = f"{finding['probability']:.3f}" if finding["source"] == "jev" else finding["level"]
-        cells = (finding["paragraph"] or "документ", label, finding["source"], score, finding["excerpt"])
+        cells = (finding["paragraph"] or "document", label, finding["source"], score, finding["excerpt"])
         lines.append("| " + " | ".join(_cell(c) for c in cells) + " |")
     if not found:
-        lines.extend(["", "Находок выше порога нет; линтер чист."])
+        lines.extend(["", "No findings above the threshold; the local lint is clear."])
     usage = report["usage"]
-    lines.extend(["", f"Jev: входных токенов {usage['input_tokens']}, выходных {usage['output_tokens']}. "
-                  f"Цена по входным токенам: ${report['cost_usd']:.8f} "
-                  f"(${INPUT_USD_PER_MILLION} за миллион; тариф выхода не задан)."])
+    lines.extend(["", f"Jev: {usage['input_tokens']} input tokens, {usage['output_tokens']} output tokens. "
+                  f"Estimated input cost: ${report['cost_usd']:.8f} "
+                  f"(${INPUT_USD_PER_MILLION} per million; output pricing not included)."])
     if sections:
         extracted = extract_sections((f["pattern"] for f in found if f["pattern"] is not None),
                                      LANGS[report.get("lang", "ru")]["reference"])
@@ -295,16 +301,16 @@ def render_markdown(report, *, sections=False):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Аудит текста: humanizer-ru или humanizer (en) + Jev")
-    parser.add_argument("file", help="Путь к тексту или - для stdin")
-    parser.add_argument("--json", metavar="OUT", type=Path, help="Сохранить все оценки и usage")
+    parser = argparse.ArgumentParser(description="Audit English writing with local lint and Jev")
+    parser.add_argument("file", help="Text file path, or - for stdin")
+    parser.add_argument("--json", metavar="OUT", type=Path, help="Save all scores and usage")
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--sections", action="store_true")
-    parser.add_argument("--no-jev", action="store_true", help="Только локальный линтер")
-    parser.add_argument("--lang", choices=sorted(LANGS), help="Язык текста; без флага — по доле кириллицы")
+    parser.add_argument("--no-jev", action="store_true", help="Run only the local linter")
+    parser.add_argument("--lang", choices=sorted(LANGS), help="Text language; detected when omitted")
     args = parser.parse_args(argv)
     if not math.isfinite(args.threshold) or not 0 <= args.threshold <= 1:
-        parser.error("--threshold должен быть числом от 0 до 1")
+        parser.error("--threshold must be between 0 and 1")
     try:
         text = sys.stdin.read() if args.file == "-" else Path(args.file).read_text(encoding="utf-8-sig")
         report = audit_text(text, threshold=args.threshold, no_jev=args.no_jev, lang=args.lang)
@@ -314,7 +320,7 @@ def main(argv=None):
                                  encoding="utf-8")
         print(output)
     except (OSError, ValueError, RuntimeError) as exc:
-        print(f"Ошибка аудита: {exc}", file=sys.stderr)
+        print(f"Audit failed: {exc}", file=sys.stderr)
         return 1
     return 0
 
