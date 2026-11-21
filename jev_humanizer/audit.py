@@ -91,7 +91,7 @@ def load_api_key():
     for path in (Path.home() / ".codex" / ".env", Path.home() / ".config" / "typesafe.env"):
         if not path.exists():
             continue
-        if path == Path.home() / ".codex" / ".env" and path.stat().st_mode & 0o077:
+        if os.name != "nt" and path == Path.home() / ".codex" / ".env" and path.stat().st_mode & 0o077:
             raise ValueError(f"Refusing to read {path}: restrict permissions to the owner (chmod 600).")
         for line in path.read_text(encoding="utf-8").splitlines():
             match = re.match(r"^\s*TYPESAFE_API_KEY\s*=\s*(.*?)\s*$", line)
