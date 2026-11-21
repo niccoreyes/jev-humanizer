@@ -262,8 +262,11 @@ class AuditTests(unittest.TestCase):
                 key_file.chmod(0o600)
                 self.assertEqual(audit.load_api_key(), "codex-key")
                 key_file.chmod(0o644)
-                with self.assertRaisesRegex(ValueError, "restrict permissions"):
-                    audit.load_api_key()
+                if audit.os.name == "nt":
+                    self.assertEqual(audit.load_api_key(), "codex-key")
+                else:
+                    with self.assertRaisesRegex(ValueError, "restrict permissions"):
+                        audit.load_api_key()
 
     def test_all_editorial_evals_with_fake_jev(self):
         cases = json.loads((audit.VENDOR / "evals" / "evals.json").read_text(encoding="utf-8"))["evals"]
