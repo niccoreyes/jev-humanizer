@@ -1,8 +1,12 @@
 ---
 name: jev-humanizer
 license: MIT
-description: Редактор русского и английского текста - убирает признаки AI-генерации, канцелярит и воду, сохраняя факты и добавляя голос. 38 паттернов AI-слопа с жёсткими запретами (негативные параллелизмы, длинное тире, математические знаки, техножаргон), детерминированным линтером и детектом артефактов копипаста из чат-ботов. Use when пишешь письмо, сообщение или пост, который прочтут люди (режим «при написании» - лучший по слепому тесту), и when пользователь просит "отредактируй", "убери воду", "сделай живым", "humanize", "очисти от AI", "перепиши человечнее", говорит что текст "звучит как нейросеть", готовит AI-черновик к публикации, или спрашивает "это писала нейросеть?", "проверь на AI", "палится ли текст" (detect-режим - аудит без правки). English too: "make it sound less like AI", "remove AI tells", "does this sound like ChatGPT", English emails and posts. Do NOT use for перевода, проверки орфографии и пунктуации, других языков, кода и конфигов, юридических и академических текстов (канцелярит и пассив там - жанр).
+description: Edit English prose so it sounds natural while preserving the writer's facts, citations, uncertainty, and voice. Use for emails, reports, posts, and prose drafts when asked to humanize, remove AI tells, or audit style. Also supports Russian. Do not treat style findings as proof of AI authorship.
 ---
+
+# English-first workflow
+
+For English writing, follow [ENGLISH.md](ENGLISH.md). It supplies the full audit, edit, and verification workflow. The Russian instructions below apply only to Russian text. The repository is at `/Users/niccoreyes/Github/jev-humanizer`; set `JEVH` to that path unless this checkout moved.
 
 # Редактор русского текста
 

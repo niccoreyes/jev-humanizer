@@ -249,7 +249,20 @@ class AuditTests(unittest.TestCase):
             with patch.dict(audit.os.environ, {"TYPESAFE_API_KEY": ""}):
                 self.assertEqual(audit.load_api_key(), "file-key")
                 (config / "typesafe.env").unlink()
-                with self.assertRaisesRegex(ValueError, "Нет TYPESAFE_API_KEY"):
+                with self.assertRaisesRegex(ValueError, "TYPESAFE_API_KEY not found"):
+                    audit.load_api_key()
+
+    def test_codex_env_key_requires_owner_only_permissions(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(audit.Path, "home", return_value=Path(tmp)):
+            codex = Path(tmp) / ".codex"
+            codex.mkdir()
+            key_file = codex / ".env"
+            key_file.write_text('OTHER=value\nTYPESAFE_API_KEY="codex-key"\n', encoding="utf-8")
+            with patch.dict(audit.os.environ, {"TYPESAFE_API_KEY": ""}):
+                key_file.chmod(0o600)
+                self.assertEqual(audit.load_api_key(), "codex-key")
+                key_file.chmod(0o644)
+                with self.assertRaisesRegex(ValueError, "restrict permissions"):
                     audit.load_api_key()
 
     def test_all_editorial_evals_with_fake_jev(self):

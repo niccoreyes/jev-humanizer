@@ -87,15 +87,18 @@ def load_api_key():
     key = os.environ.get("TYPESAFE_API_KEY", "").strip()
     if key:
         return key
-    path = Path.home() / ".config" / "typesafe.env"
-    if path.exists():
+    for path in (Path.home() / ".codex" / ".env", Path.home() / ".config" / "typesafe.env"):
+        if not path.exists():
+            continue
+        if path == Path.home() / ".codex" / ".env" and path.stat().st_mode & 0o077:
+            raise ValueError(f"Refusing to read {path}: restrict permissions to the owner (chmod 600).")
         for line in path.read_text(encoding="utf-8").splitlines():
             match = re.match(r"^\s*TYPESAFE_API_KEY\s*=\s*(.*?)\s*$", line)
             if match:
                 key = match[1].strip("\"'").strip()
                 if key:
                     return key
-    raise ValueError("Нет TYPESAFE_API_KEY в окружении или ~/.config/typesafe.env; доступен --no-jev.")
+    raise ValueError("TYPESAFE_API_KEY not found in the environment, ~/.codex/.env, or ~/.config/typesafe.env; use --no-jev for a local-only audit.")
 
 
 def call_jev(state, questions, *, api_key):

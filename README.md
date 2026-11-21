@@ -1,3 +1,5 @@
+**English-first fork:** Start with [README.en.md](README.en.md) and the [English writing workflow](skill/ENGLISH.md). The instructions below document the original Russian workflow and upstream setup.
+
 <p align="center">
   <img src="assets/banner.png" alt="jev-humanizer: текст без AI-слопа" width="100%">
 </p>
